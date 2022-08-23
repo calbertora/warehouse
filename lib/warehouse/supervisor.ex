@@ -1,7 +1,8 @@
 defmodule Warehouse.Supervisor do
   def start_link do
     children = [
-      Warehouse.Receiver
+      Warehouse.Receiver,
+      Warehouse.DeliveratorPool
     ]
 
     opts = [strategy: :one_for_all]

@@ -3,7 +3,7 @@ defmodule Warehouse.Deliverator do
   alias Warehouse.Receiver
 
   def start(state \\[]) do
-    GenServer.start_link(__MODULE__, state)
+    GenServer.start(__MODULE__, state)
   end
 
   def deliver_packages(pid, packages) do
@@ -16,10 +16,11 @@ defmodule Warehouse.Deliverator do
     {:noreply, state}
   end
 
-  defp deliver([]), do: Process.exit(self(), :normal)
+  defp deliver([]), do: send(Receiver, {:deliverator_idle, self()})
   defp deliver([package | remaining]) do
     IO.puts "Deliverator #{inspect self()} deliverying #{inspect package}"
     make_delivery()
+    send(Receiver, {:package_delivered, package})
     deliver(remaining)
   end
 
@@ -30,6 +31,6 @@ defmodule Warehouse.Deliverator do
 
   defp maybe_crash do
     crash_factor = :rand.uniform(100)
-    if crash_factor > 60, do: raise "Oh no! going down, Bye!"
+    if crash_factor > 80, do: raise "Oh no! going down, Bye!"
   end
 end
